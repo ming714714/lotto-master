@@ -21,8 +21,10 @@ jobs:
         run: node fetch.js
       - name: Commit and push
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
           git add data.json
-          git commit -m "🤖 自動更新開獎號碼"
+          git commit -m "🤖 自動更新開獎號碼" || echo "No changes to commit"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

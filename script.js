@@ -1,1 +1,1 @@
-console.log('script loaded');
+fetch('data.json').then(res => res.json()).then(data => { document.getElementById('latest').innerText = JSON.stringify(data[0]); });

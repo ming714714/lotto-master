@@ -1,1 +1,6 @@
-body { background: #eef; font-family: sans-serif; padding: 2rem; }
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #eef;
+  padding: 2em;
+}

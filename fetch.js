@@ -1,24 +1,11 @@
 
-const fetch = require('node-fetch');
-const cheerio = require('cheerio');
-const fs = require('fs');
-
-async function main() {
-  const res = await fetch('https://bet.hkjc.com/marksix/marksix.aspx?lang=ZH');
-  const html = await res.text();
-  const $ = cheerio.load(html);
-
-  const draws = [];
-  $('.draw-period').each((i, el) => {
-    const period = parseInt($(el).find('.period').text());
-    const date = $(el).find('.date').text();
-    const nums = [];
-    $(el).find('.ball').each((j, b) => nums.push(parseInt($(b).text())));
-    draws.push({ period, date, numbers: nums });
-  });
-
-  const data = draws.slice(0, 200);
-  fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
-}
-
-main().catch(console.error);
+fetch("https://ming714714.github.io/lotto-master/data.json")
+  .then(response => response.json())
+  .then(data => {
+    console.log("成功載入資料：", data);
+    document.getElementById("latest").innerHTML = "載入成功，共 " + data.length + " 筆資料";
+  })
+  .catch(error => {
+    console.error("載入資料失敗：", error);
+    document.getElementById("latest").innerHTML = "載入資料失敗";
+});

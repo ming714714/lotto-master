@@ -1,1 +1,22 @@
-body { font-family: sans-serif; background: #eef; padding: 1em; } h1 { color: navy; }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #eef;
+  padding: 1em;
+}
+h1 {
+  color: darkblue;
+}
+#latest-numbers span,
+#hot-numbers span,
+#cold-numbers span,
+#natural-recommend span,
+#smart-recommend span {
+  display: inline-block;
+  background: lightblue;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  margin: 2px;
+}

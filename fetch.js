@@ -1,22 +1,24 @@
 
-const axios = require('axios');
+const fetch = require('node-fetch');
+const cheerio = require('cheerio');
 const fs = require('fs');
 
-async function fetchData() {
-  try {
-    const draws = [];
-    for (let i = 0; i < 200; i++) {
-      const nums = [];
-      while (nums.length < 6) {
-        const n = Math.floor(Math.random() * 49) + 1;
-        if (!nums.includes(n)) nums.push(n);
-      }
-      draws.push({ period: 1000 + i, numbers: nums.sort((a,b)=>a-b) });
-    }
-    fs.writeFileSync('data.json', JSON.stringify(draws, null, 2));
-    console.log("✅ 已更新最新 200 期資料到 data.json");
-  } catch (err) {
-    console.error("❌ 抓取失敗", err);
-  }
+async function main() {
+  const res = await fetch('https://bet.hkjc.com/marksix/marksix.aspx?lang=ZH');
+  const html = await res.text();
+  const $ = cheerio.load(html);
+
+  const draws = [];
+  $('.draw-period').each((i, el) => {
+    const period = parseInt($(el).find('.period').text());
+    const date = $(el).find('.date').text();
+    const nums = [];
+    $(el).find('.ball').each((j, b) => nums.push(parseInt($(b).text())));
+    draws.push({ period, date, numbers: nums });
+  });
+
+  const data = draws.slice(0, 200);
+  fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
 }
-fetchData();
+
+main().catch(console.error);

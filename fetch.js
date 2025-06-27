@@ -1,33 +1,43 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+
+const puppeteer = require('puppeteer');
 const fs = require('fs');
 
 (async () => {
-  try {
-    const response = await axios.get('https://bet.hkjc.com/marksix/');
-    const $ = cheerio.load(response.data);
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  const page = await browser.newPage();
+  await page.goto('https://bet.hkjc.com/marksix/', { waitUntil: 'networkidle2' });
 
-    const latestDrawText = $('.drawNumber').first().text().trim();
-    const numberBalls = $('.ball').map((i, el) => parseInt($(el).text())).get().slice(0, 6);
+  const result = await page.evaluate(() => {
+    const balls = Array.from(document.querySelectorAll('.tdBall .ballnumber'));
+    const numbers = balls.map(el => parseInt(el.textContent)).filter(n => !isNaN(n));
+    const dateText = document.querySelector('.drawDate span')?.textContent || '';
+    return {
+      date: dateText,
+      numbers: numbers
+    };
+  });
 
-    const latest = {
+  await browser.close();
+
+  if (result.numbers.length === 6) {
+    const record = {
       period: Date.now(),
-      numbers: numberBalls
+      numbers: result.numbers
     };
 
     let data = [];
-    const file = 'data.json';
-    if (fs.existsSync(file)) {
-      data = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (fs.existsSync('data.json')) {
+      data = JSON.parse(fs.readFileSync('data.json'));
     }
-
-    data.unshift(latest);
+    data.unshift(record);
     data = data.slice(0, 200);
-    fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
-
-    console.log('✅ 成功寫入最新資料:', latest);
-  } catch (error) {
-    console.error('❌ 爬蟲失敗:', error.message);
+    fs.writeFileSync('data.json', JSON.stringify(data, null, 2), 'utf8');
+    console.log('✅ 更新成功:', record);
+  } else {
+    console.log('❌ 抓取開獎號碼失敗');
     process.exit(1);
   }
 })();
